@@ -1,9 +1,9 @@
 // =============================================================================
 //
-//  schedule_task.cpp
+//  shootSensor.cpp
 //  Airspace Application
 //
-//  Created by Ivan Lozano on 10/11/16.
+//  Created by Ivan Lozano on 11/2/16.
 //  Copyright © 2016 Defense Labs. All rights reserved.
 //
 // =============================================================================
@@ -26,87 +26,30 @@
 
 using namespace std;
 
-class MatriceControl : public thread_c{
+class shootSensor : public thread_c {
 
-    private:
-    int armedFromAirspaceVar = 1;
+  private:
+    // int armedFromAirspaceVar = 1;
     int fd;
+    int init_serial();
+    unsigned char read_serial(int* n) ;
+    int thread_entry();
 
-    protected:
-    
+  protected:
 
-    int init_serial() {
-  unsigned char read_serial(int* n) 
+  public:
+    bool armed;
+    bool fired;
+    bool connected;
 
-int main()
-{
-  init_serial();
-  std::cout << "::::Running serial reader to Fire/Sensor module:" << std::endl;
-  // write_serial((void*)"v");//ask version
-  write(fd, "v", 1);
-  write(fd, "TEST-", 5);
-  int fired = 0;
-  int n=0;
-  char read_char;  
-  char buf[10];
-  /*READ WORKING:
-  while(1){
-     read_char= read_serial(&n);
-     if(n>0){std::cout<<"-Pointer n:"<<n<<" Char read:"<<read_char<<std::endl;  }
-  }*/
-
-
-  while (1) { //
-
-    //////////////////////////////////////////////////////////////////
-    read_char= read_serial(&n);
-    if (read_char == 'f')
+    shootSensor()
     {
-      fired = 1;
-      cout << "********** Net fired!" << endl;
+        init_serial();
+        create(); // Create Thread -> calling thread_entry()
+         armed=0;
+         fired=0;
+         connected=0;
     }
-    else
-    {
-      fired = 0;//TODO
-      if (armedFromAirspaceVar && !fired)
-      {
-        // write_serial((void*)"a");//send arm to aislan device
-        write(fd, "a", 1);
-        // read_char=read_serial();
-        // read_serial(read_char);
-        while (armedFromAirspaceVar)
-        {
-          cout << "********** in the while..." << endl;
-          read_char= read_serial(&n);
-          cout << "********** serial read stop...:" << read_char << endl;
-          // read_serial(read_char);
-          if (read_char == 'f') {
-            //repeate while
-          }
-          else {
-            fired = 1;
-            cout << "**********fired received, must to go out of the while..." << endl;
-            // exit(1);//TODO
-            // usleep(2000000);
-          }
-        }
-      }
-      // write_serial((void*)"d");//send disarm to aislan device
-      write(fd, "d", 1);
-      //TODO: goto home/main after here
-    }
-
-  }
-
-
-
-
-  // Don't forget to clean up
-  close(fd);
-  return 0;
-}
-
-
 };
 
 

@@ -1,3 +1,14 @@
+// =============================================================================
+//
+//  shootSensor.h
+//  Airspace Application
+//
+//  Created by Ivan Lozano on 11/2/16.
+//  Copyright © 2016 Defense Labs. All rights reserved.
+//
+// =============================================================================
+
+
 #include "shootSensor.h"
 
 using namespace std;
@@ -46,7 +57,7 @@ unsigned char shootSensor::read_serial(int* n)
 
 int shootSensor::thread_entry()//threat or main logic
 {
-  init_serial();
+  // init_serial(); working on the initialization on: shootSensor()
   std::cout << "::::Running serial reader to Fire/Sensor module:" << std::endl;
   // write_serial((void*)"v");//ask version
   write(fd, "v", 1);
@@ -60,8 +71,6 @@ int shootSensor::thread_entry()//threat or main logic
      read_char= read_serial(&n);
      if(n>0){std::cout<<"-Pointer n:"<<n<<" Char read:"<<read_char<<std::endl;  }
   }*/
-
-
   while (1) { //
 
     //////////////////////////////////////////////////////////////////
@@ -103,9 +112,6 @@ int shootSensor::thread_entry()//threat or main logic
     }
 
   }
-
-
-
 
   // Don't forget to clean up
   close(fd);
