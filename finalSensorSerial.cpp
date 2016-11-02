@@ -10,31 +10,23 @@ using namespace std;
 int main()
 {
 	int  fd = open( "/dev/ttyS0", O_RDWR| O_NOCTTY );
-	// int  fd = open( "/dev/ttyACM0", O_RDWR| O_NOCTTY );
-	// fcntl(fd, F_SETFL, 0);
-
-	/*Define the POSIX structure*/
+	  // fd = open( "/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY);
+	
 	struct termios tty;
-
-	/*Read the attribute structure*/
 	tcgetattr(fd, &tty);
-
-	/*Set the baud rate of the port  to 9600*/
-	// cfsetispeed(&tty, B230400);
-    // cfsetospeed(&tty, B230400);
-	cfsetispeed(&tty, B115200);
-	cfsetospeed(&tty, B115200);
-        	tty.c_cflag |= (CLOCAL | CREAD);
-
-	/*Define other parameters in order to  realize the 8N1 standard*/
+	cfsetispeed(&tty, B230400);
+    cfsetospeed(&tty, B230400);
+    tty.c_cflag |= (CLOCAL | CREAD);
 	tty.c_cflag &= ~PARENB;
 	tty.c_cflag &= ~CSTOPB;
 	tty.c_cflag &= ~CSIZE;
 	tty.c_cflag |= CS8;
-	
+	// tty.c_cflag     &=  ~CRTSCTS;           // no flow control
+    // tty.c_cc[VMIN]   =  1;                  // read doesn't block
+    // tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
 	/*Apply the new attributes */
 	tcsetattr(fd, TCSANOW, &tty);
-
+// fcntl(fd, F_SETFL, FNDELAY);
 
 	/*Now, we read the first 100 line from the data stream, then we close the port */
 
@@ -59,13 +51,12 @@ std::cout << "writing: Hello: " << endl;
 
 while(!toggle){
 
-	char buf[1000];
-std::cout << "Read init: " << endl;
+	char buf[10];
+    std::cout << "Read init: " << endl;
 	for(int i=0; i<100;i++) {
-		std::cout<<"Block/"<<i<<"/";
-		// std::cout<<"Block/"<<i<<"/"<<std::endl;
-		read( fd, &buf , 10);
-		std::cout << "Read: " << buf[0] << endl;
+		n=read( fd, &buf , 2);
+		// n=read( fd, &buf , 10);
+		std::cout<<"Num of chars:"<<n << " Read: " << buf[0] << endl;
 	}
 }
 	close(fd);

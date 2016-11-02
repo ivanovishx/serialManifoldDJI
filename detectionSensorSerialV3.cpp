@@ -16,16 +16,19 @@ int armedFromAirspaceVar = 1;
 int fd;
 
 int init_serial() {
-  fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY);
+  // fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY);
+  fd = open( "/dev/ttyS0", O_RDWR| O_NOCTTY );
   if (fd == -1) {
     perror("open_port: Unable to open /dev/ttyS0 - ");
     return (-1);
   }
+
   else {
+    // perror("open_port: OK ");
     struct termios tty;
     tcgetattr(fd, &tty);
-    cfsetispeed(&tty, B230400);
-    cfsetospeed(&tty, B230400);
+    cfsetispeed(&tty, B115200);cfsetospeed(&tty, B115200);
+    // cfsetispeed(&tty, B230400);cfsetospeed(&tty, B230400);
     tty.c_cflag |= (CLOCAL | CREAD);
     tty.c_cflag &= ~PARENB;
     tty.c_cflag &= ~CSTOPB;
@@ -54,6 +57,7 @@ int init_serial() {
     //    std::cout << "Error " << errno << " from tcsetattr" << std::endl;
     // }
   }
+  
   // Turn off blocking for reads, use (fd, F_SETFL, FNDELAY) if you want that
   // fcntl(fd, F_SETFL, FNDELAY);
   // fcntl(fd, F_SETFL, 0);//blocking serial port flow
@@ -61,97 +65,27 @@ int init_serial() {
 
 
 
-unsigned char read_serial() {
-  char buf[10];
-  std::cout << "Read init: " << endl;
-  for (int i = 0; i < 100; i++) {
-    n = read( fd, &buf , 2);
-    // n=read( fd, &buf , 10);
-    std::cout << "Num of chars:" << n << " Read: " << buf[0] << endl;
-  }
+unsigned char read_serial(int* n) 
+{   
+   char buff[100];
+    *n =read( fd, &buff , 2);
+    // std::cout<<"Num of chars:"<<*n<<std::endl; 
+    if((*n>0) && ((buff[0] !='\r')||(buff[0] !='\n')))
+    {
+      // std::cout<< " Char Read: " << buff[0] << std::endl;
+      // usleep(2000000);
+      return buff[0];
+      }
+
 }
 
 
-// unsigned char read_serial() {
-//    static char c;
-//     read(fd, &c, 1);
-//     std::cout << "Charter read:" << c << std::endl;
-//     return c;
 
-
-// }
-
-/*int read_serial(char &read_char) {
-  // TODO: we need to send aaaa to read only one a, improve this!
-  // Read up to 255 characters from the port if they are there
-  char buf[256]={0};
-  int n = read(fd, (void*)buf, 4);
-  if (n < 0) {
-    perror("Read failed - ");
-    return -1;
-  }
-  else if (n == 0) {
-    // printf("No data on port\n");
-    std::cout << "No data on Serial port" << std::endl;
-    // usleep(500000);
-  }
-  else {
-
-    read_char = buf[0];
-    std::cout << "Charter read:" << read_char << std::endl;
-
-
-
-
-    // buf[n] = '\0';
-    // printf("%i bytes read : %s", n, buf);
-    // usleep(500000);
-
-    //  if (read_char == '1')
-    // {
-    //   armedFromAirspaceVar = 1;
-    //   cout << "********** armedFromAirspaceVar=1" << endl;
-    // }
-    // else if (read_char == '0')
-    // {
-    //   armedFromAirspaceVar = 0;
-    //   cout << "********** armedFromAirspaceVar=0" << endl;
-    // }
-
-  }
-  }
-*/
 
 std::string readLine()
 {
 
-  //     std::string m_line;
-  //     std::string m_lineQ;
-
-  //     string line;
-  //     int n;
-  //     char buf[255];
-
-  //     n = read(fd, buf, 255);
-  //     if(n > 0) {
-  //             // read up to \n
-  //             for(int i=0; i < n; i++) {
-  //                     if(buf[i] == '\r') {
-  //                             // m_lineQ.push(m_line);
-  //                             m_line.clear();
-  //                     } else {
-  //                             if(buf[i] != 0 && buf[i] != '\n')
-  //                                     m_line += buf[i];
-  //                     }
-  // }
-  //     }
-  //     if(m_lineQ.size() > 0) {
-  //             // line = m_lineQ.front();
-  // // Debugging
-  // //fprintf(stderr, "SERIAL LINE: %s\n", line.c_str());
-  //             // m_lineQ.pop();
-  //     }
-  //     return line;
+ 
 }
 
 int main()
@@ -160,23 +94,41 @@ int main()
   std::cout << "::::Running serial reader to Fire/Sensor module:" << std::endl;
   // write_serial((void*)"v");//ask version
   write(fd, "v", 1);
-
   write(fd, "TEST-", 5);
-
-
-  static char read_char;
   int fired = 0;
-  // static char c;
-  int n = 0,
-      spot = 0;
-  char buf = '\0';
+  int n=0;
+  char read_char;  
+  char buf[10];
 
-  /* Whole response*/
-  char response[1024];
-  memset(response, '\0', sizeof response);
-  while (1) {
-    cout << "********** in the while..." << endl;
 
+while(1){
+
+
+// do{
+   read_char= read_serial(&n);
+   // read_serial(&n);
+   if(n>0){
+    std::cout<<"-Pointer n:"<<n<<" Char read:"<<read_char<<std::endl;  
+    // usleep(2000000); 
+   }
+  // }while(n>0);
+
+// std::cout<<"waiting serial port:"<<std::endl ;
+}
+
+
+
+
+
+  while (buf[1] != '\r' && n > 0) {
+    // cout << "********** in the while..." << endl;
+    std::cout << "Read init: " << endl;
+  for(int i=0; i<100;i++) {
+    n=read( fd, &buf , 2);
+    // n=read( fd, &buf , 10);
+    std::cout<<"Num of chars:"<<n << " Read: " << buf[0] << endl;
+    }
+/*
 
     do {
       n = read( fd, &buf, 1 );
@@ -189,13 +141,13 @@ int main()
     // if(read(fd, &read_char, 1))
     // {
 
-    cout << "********** serial read stop1...:" << read_char << endl;
-    usleep(500000);
+    // cout << "********** serial read stop1...:" << read_char << endl;
+    // usleep(500000);
     // }
     // else
     // {
     // cout<<"no read "<<endl;
-    // }
+    // }*/
   }
 
 
