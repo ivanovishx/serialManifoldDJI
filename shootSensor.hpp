@@ -33,23 +33,21 @@ class shootSensor : public thread_c {
     // int armedFromAirspaceVar = 1;
     int fd;
     int init_serial();
-    char read_serial(int* n) ;
+    unsigned char read_serial(int* n) ;
     void thread_entry();
 
   protected:
 
   public:
-    bool armedFromAirspaceVar;
+    bool armed;
     bool fired;
     bool connected;
-    int armSensor();
-    int disarmSensor();
 
     shootSensor()
     {
         init_serial();
         create(); // Create Thread -> calling thread_entry()
-         armedFromAirspaceVar=0;
+         armed=0;
          fired=0;
          connected=0;
     }

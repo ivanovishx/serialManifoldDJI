@@ -9,14 +9,14 @@
 // =============================================================================
 
 
-#include "shootSensor.h"
+#include "shootSensor.hpp"
 
 using namespace std;
 int armedFromAirspaceVar = 1;
 int fd;
 
 int shootSensor::init_serial() {
-  // fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY);
+  // fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY); 
   fd = open( "/dev/ttyS0", O_RDWR| O_NOCTTY );
   if (fd == -1) {
     perror("open_port: Unable to open /dev/ttyS0 - ");
@@ -42,7 +42,7 @@ int shootSensor::init_serial() {
   
 }
 
-unsigned char shootSensor::read_serial(int* n) 
+char shootSensor::read_serial(int* n) 
 {   
    char buff[100];
     *n =read( fd, &buff , 2);
@@ -55,7 +55,9 @@ unsigned char shootSensor::read_serial(int* n)
 
 }
 
-int shootSensor::thread_entry()//threat or main logic
+int shootSensor:: 
+
+void shootSensor::thread_entry()//threat or main logic
 {
   // init_serial(); working on the initialization on: shootSensor()
   std::cout << "::::Running serial reader to Fire/Sensor module:" << std::endl;
@@ -82,28 +84,26 @@ int shootSensor::thread_entry()//threat or main logic
     }
     else
     {
-      fired = 0;//TODO
+      // fired = 0;//TODO
       if (armedFromAirspaceVar && !fired)
       {
-        // write_serial((void*)"a");//send arm to aislan device
-        write(fd, "a", 1);
-        // read_char=read_serial();
-        // read_serial(read_char);
+
+        write(fd, "a", 1);//send arm to Aislan sensor
         while (armedFromAirspaceVar)
         {
           cout << "********** in the while..." << endl;
           read_char= read_serial(&n);
           cout << "********** serial read stop...:" << read_char << endl;
-          // read_serial(read_char);
+
           if (read_char == 'f') {
-            //repeate while
-          }
-          else {
             fired = 1;
             cout << "**********fired received, must to go out of the while..." << endl;
-            // exit(1);//TODO
-            // usleep(2000000);
+            armedFromAirspaceVar=0;
           }
+          // else {
+          //   //repeate while
+
+          // }
         }
       }
       // write_serial((void*)"d");//send disarm to aislan device
@@ -115,5 +115,5 @@ int shootSensor::thread_entry()//threat or main logic
 
   // Don't forget to clean up
   close(fd);
-  return 0;
+  // return 0;
 }
