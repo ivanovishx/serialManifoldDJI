@@ -53,15 +53,35 @@ int init_serial() {
   
 }
 
+char read_serial(int* n) 
+{   
+   char buff[100];
+    *n =read( fd, &buff , 2);
+    // std::cout<<"Num of chars:"<<*n<<std::endl; 
+    if((*n>0) && ((buff[0] !='\r')||(buff[0] !='\n')))
+    {
+      // std::cout<< " Char Read: " << buff[0] << std::endl;usleep(2000000);
+      return buff[0];
+      }
+
+}
+
+
 int main(int argc, char *argv[])
 {
+char read_char;  
+int n=0;
 init_serial();
-
+  cout<<"Reading serial: "<<endl;	
   while(1){
-    cout<<"writing:z "<<endl;
-    write(fd, "z", 1);//send disarm to Aislan sensor
-    usleep(1000000);
-	
+    //cout<<"writing:x "<<endl;
+    //write(fd, "x", 1);//send disarm to Aislan sensor
+    //usleep(1000000);
+    read_char= read_serial(&n);
+    //if(n){
+      cout<<read_char<<endl;
+    //} 
+    usleep(10);
  }
 
 
