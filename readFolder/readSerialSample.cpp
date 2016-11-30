@@ -1,0 +1,91 @@
+//System Headers
+
+
+#include <cstring>
+
+
+
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+#include <string>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+#include <linux/serial.h>
+/////////////
+using namespace std;
+int armedFromAirspaceVar = 1;
+int fd;
+
+int init_serial() {
+  //fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY); 
+  //fd = open("/dev/tty0", O_RDWR| O_NOCTTY );
+  //fd = open("/dev/ttyS0", O_RDWR| O_NOCTTY );
+  //fd = open("/dev/ttyTHS0", O_RDWR| O_NOCTTY );
+  //fd = open("/dev/ttyTHS1", O_RDWR| O_NOCTTY );
+  //fd = open("/dev/ttyTHS2", O_RDWR| O_NOCTTY );
+  //fd = open("/dev/ttyTHS3", O_RDWR| O_NOCTTY );
+  //fd = open("/dev/ttyTHS1", O_RDWR| O_NOCTTY );
+  //OKfd = open("/dev/ttyTHS2", O_RDWR| O_NOCTTY );
+  //fd = open("/dev/ttyUSB0", O_RDWR| O_NOCTTY );
+  fd = open("/dev/ttyACM0", O_RDWR| O_NOCTTY );
+  if (fd == -1) {
+    perror("open_port: Unable to open /dev/ttyYOURPORT - ");
+    return (-1);
+  }
+
+  else {
+    // perror("open_port: OK ");
+    struct termios tty;
+    tcgetattr(fd, &tty);
+    cfsetispeed(&tty, B230400);cfsetospeed(&tty, B230400);
+    tty.c_cflag |= (CLOCAL | CREAD);
+    tty.c_cflag &= ~PARENB;
+    tty.c_cflag &= ~CSTOPB;
+    tty.c_cflag &= ~CSIZE;
+    tty.c_cflag |= CS8;
+    tcsetattr(fd, TCSANOW, &tty);
+  // Turn off blocking for reads, use (fd, F_SETFL, FNDELAY) if you want that
+  // fcntl(fd, F_SETFL, FNDELAY);
+  // fcntl(fd, F_SETFL, 0);//blocking serial port flow
+  }
+  
+}
+
+char read_serial(int* n) 
+{   
+   char buff[100];
+    *n =read( fd, &buff , 2);
+    // std::cout<<"Num of chars:"<<*n<<std::endl; 
+    if((*n>0) && ((buff[0] !='\r')||(buff[0] !='\n')))
+    {
+      // std::cout<< " Char Read: " << buff[0] << std::endl;usleep(2000000);
+      return buff[0];
+      }
+
+}
+
+
+int main(int argc, char *argv[])
+{
+char read_char;  
+int n=0;
+init_serial();
+  cout<<"Reading serial: "<<endl;	
+  while(1){
+    //cout<<"writing:x "<<endl;
+    //write(fd, "x", 1);//send disarm to Aislan sensor
+    //usleep(1000000);
+    read_char= read_serial(&n);
+    //if(n){
+      cout<<read_char<<endl;
+    //} 
+    usleep(10);
+ }
+
+
+  return 0;
+}
